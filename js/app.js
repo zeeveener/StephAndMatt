@@ -56,7 +56,7 @@ rsvpForm.addEventListener('submit', (event) => {
 
     // Check if "Other" is selected and add the specified diet
     if (document.getElementById('other').checked) {
-      const otherDiet = document.getElementById('other-diet').value;
+      const otherDiet = document.getElementById('otherDiet').value;
       if (otherDiet.trim() !== '') {
         dietRestrictions.push(otherDiet);
       }
