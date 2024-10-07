@@ -25,55 +25,76 @@ setInterval(rotateCarousel, 10000);
 const rsvpForm = document.getElementById('rsvp-form');
 const rsvpBanner = document.getElementById('rsvp-banner');
 
-// Function to validate the RSVP form
-function validateRSVPForm() {
-  const nameInput = document.getElementById('name');
-
-  // Check if the name input is empty
-  if (nameInput.value.trim() === '') {
-    alert('Please enter your name.');
-    return false;
-  }
-
-  return true;
-}
-
 // Add an event listener to the RSVP form
 rsvpForm.addEventListener('submit', (event) => {
   event.preventDefault();
-
-  // Validate the form before submitting
-  if (validateRSVPForm()) {
-    // Get the form data
-    const name = document.getElementById('name').value;
-
-    // Collect diet restrictions
-    const dietRestrictions = [];
-    const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
-    dietCheckboxes.forEach((checkbox) => {
-      dietRestrictions.push(checkbox.value);
-    });
-
-    // Check if "Other" is selected and add the specified diet
-    if (document.getElementById('other').checked) {
-      const otherDiet = document.getElementById('otherDiet').value;
-      if (otherDiet.trim() !== '') {
-        dietRestrictions.push(otherDiet);
-      }
-    }
-
-    // Display the thank you banner
-    rsvpBanner.classList.remove('hidden');
-
-    // Log the collected data
-    console.log(`Name: ${name}`);
-    console.log(`Diet restrictions: ${dietRestrictions.join(', ')}`);
-
-    // Reset the form
-    rsvpForm.reset();
-    document.getElementById('other-diet-container').style.display = 'none';
+  const requestParams = {
+    name: '',
+    glutenFree: false,
+    dairyFree: false,
+    vegan: false,
+    vegetarian: false,
+    shellfishAllergy: false,
+    nutAllergy: false,
+    otherDiet: '',
+    plusOnes: ['']
   }
+
+  // Get the name
+  requestParams.name = document.getElementById('name').value;
+
+  // Collect diet restrictions
+  requestParams.glutenFree = document.getElementById("glutenFree").checked;
+  requestParams.dairyFree = document.getElementById("dairyFree").checked;
+  requestParams.vegan = document.getElementById("vegan").checked;
+  requestParams.vegetarian = document.getElementById("vegetarian").checked;
+  requestParams.shellfishAllergy = document.getElementById("shellfishAllergy").checked;
+  requestParams.nutAllergy = document.getElementById("nutAllergy").checked;
+
+  // Check if "Other" is selected and add the specified diet
+  if (document.getElementById('other').checked) {
+    const otherDiet = document.getElementById('otherDiet').value.trim();
+    if (otherDiet !== '') {
+      requestParams.otherDiet = otherDiet;
+    }
+  }
+
+  requestParams.plusOnes = document.getElementById('plusOnes').value;
+
+  console.log(requestParams);
+  makeRSVPApiCall(requestParams);
+
+  // Display the thank you banner
+  rsvpBanner.classList.remove('hidden');
+
+  // Reset the form
+  rsvpForm.reset();
+  document.getElementById('other-diet-container').style.display = 'none';
 });
+
+function makeRSVPApiCall(params) {
+  const url = 'https://weddingwebsitebackend.zvnr.ca/rsvps';
+  const request = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(params),
+  };
+
+  fetch(url, request)
+    .then(response => {
+      if (!response.ok) {
+        console.log(`Unable to add RSVP: ${response.status}`);
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    })
+}
 
 // FAQ functionality
 const faqItems = document.querySelectorAll('.faq-item');
